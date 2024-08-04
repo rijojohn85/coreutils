@@ -28,6 +28,7 @@ bool *get_args(Options *options, int argc, char *args[], char *version,
       printf("%s\n", version);
       exit(EXIT_SUCCESS);
     } else {
+
       printf("Arguments: %s\n", args[i]);
     }
   }
