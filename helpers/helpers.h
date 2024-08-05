@@ -12,11 +12,19 @@ typedef struct {
   int file_number;
   char *files[];
 } Arguments;
+
 /*
  * prints help output of the program
  */
 void print_help(Options *options, char *example_usage, char *useage,
                 int length);
+/*
+ * fetches arguments and file names from input
+ */
 Arguments *get_args(Options *options, int argc, char *args[],
                     const char *version, int opt_len);
+/*
+ * frees argument variable
+ */
+void free_arg(Arguments *arg);
 #endif

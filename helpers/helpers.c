@@ -66,3 +66,8 @@ Arguments *get_args(Options *options, int argc, char *args[],
   ret_value->file_number = file_counter;
   return ret_value;
 }
+
+void free_arg(Arguments *arg) {
+  free(arg->arguments);
+  free(arg);
+}

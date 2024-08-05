@@ -42,8 +42,7 @@ int main(int argc, char *args[]) {
     Arguments *arg = get_args(options, argc, args, version, length);
     print_args(arg);
 
-    free(arg->arguments);
-    free(arg);
+    free_arg(arg);
   } else {
     bytes_read = getline(&st_in, &len, stdin);
     if (bytes_read != -1) {
