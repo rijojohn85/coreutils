@@ -37,16 +37,20 @@ int length = sizeof(options) / sizeof(options[0]);
 int main(int argc, char *args[]) {
   char *st_in = NULL;
   size_t len = 0;
-  ssize_t bytes_read;
+  ssize_t bytes_read = 0;
   if (argc > 1) {
     Arguments *arg = get_args(options, argc, args, version, length);
     print_args(arg);
 
     free_arg(arg);
   } else {
-    bytes_read = getline(&st_in, &len, stdin);
-    if (bytes_read != -1) {
-      printf("%s", st_in);
+    while (bytes_read != -1) {
+      // TODO: need to work on this shit.
+      bytes_read = getline(&st_in, &len, stdin);
+      if (bytes_read != -1) {
+        printf("%s", st_in);
+        break;
+      }
     }
   }
   free(st_in);
