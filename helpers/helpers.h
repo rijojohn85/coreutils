@@ -1,6 +1,7 @@
 #ifndef HELPERS
 #define HELPERS
 #include <stdbool.h>
+#include <stdint.h>
 typedef struct {
   char *input;
   char *alt_inpt;
@@ -9,7 +10,8 @@ typedef struct {
 } Options;
 typedef struct {
   bool *arguments;
-  char **files;
+  uint32_t *file_number;
+  char *files[];
 } Arguments;
 /*
  * prints help output of the program

@@ -1,5 +1,6 @@
 #include "../helpers/helpers.h"
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -29,7 +30,7 @@ Options options[] = {
     {"-v", "--show-nonprinting", "use ^ and M- notation except for LFD and TAB",
      "v"},
     {"-h", "--help", "displays this help and exit.", "h"},
-    {"--version", "", "output version information and exit", "version"}
+    {"--version", "", "output version information and exit", ""}
 
 };
 int length = sizeof(options) / sizeof(options[0]);
@@ -42,6 +43,8 @@ int main(int argc, char *args[]) {
   if (argc > 1) {
     Arguments *arg = get_args(options, argc, args, version, length);
     print_args(arg);
+    // printf("File Pointer:main func %p\n", (arg->files - 1));
+
     free(arg->arguments);
     free(arg);
   } else {
@@ -58,8 +61,11 @@ void print_args(Arguments *arg) {
     if (*(arg->arguments + i) == true)
       printf("Option %s chosen\n", options[i].input);
   }
-  while ((arg->files) != NULL) {
-    printf("File: %s\n", *(arg->files));
-    arg->files++;
+  for (uint32_t i = 0; i < *arg->file_number + 1; i++) {
+    printf("File: %s\n", *(arg->files + i));
   }
+  // while ((arg->files) != NULL) {
+  //   printf("File: %s\n", *(arg->files));
+  //   arg->files++;
+  // }
 }

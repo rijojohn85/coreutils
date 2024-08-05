@@ -21,7 +21,6 @@ Arguments *new_arguments() {
     exit(EXIT_FAILURE);
   }
   ret_value->arguments = NULL;
-  ret_value->files = NULL;
   return ret_value;
 }
 
@@ -29,9 +28,12 @@ Arguments *get_args(Options *options, int argc, char *args[], char *version,
                     int opt_len) {
 
   bool *arguments = malloc(opt_len * sizeof(bool));
+  bool flag = false;
 
   Arguments *ret_value = new_arguments();
   ret_value->arguments = arguments;
+  uint32_t file_counter = 0;
+  ret_value->file_number = &file_counter;
 
   for (int i = 1; i < argc; i++) {
     if (strcmp(args[i], "\0") == 0) {
@@ -53,13 +55,16 @@ Arguments *get_args(Options *options, int argc, char *args[], char *version,
         for (int k = 1; k < (int)strlen(args[i]); k++) {
           for (int j = 0; j < opt_len; j++) {
             // printf("%c", args[i][k]);
-            if (*options[j].search_char == args[i][k])
+            if (*options[j].search_char == args[i][k]) {
               *(ret_value->arguments + j) = true;
+              break;
+            }
           }
         }
       } else {
-        (ret_value->files) = &args[i];
-        ret_value->files++;
+        *(ret_value->files + file_counter) = args[i];
+        // printf("File Pointer: helper func %p\n", ret_value->files);
+        file_counter++;
       }
     }
   }
