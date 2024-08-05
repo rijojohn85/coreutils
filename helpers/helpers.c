@@ -1,10 +1,8 @@
 #include "helpers.h"
 #include <stdbool.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-// TODO: free memeory
 void print_help(Options *options, char *examples, char *useage, int length) {
   printf("%s\n", useage);
   for (int i = 0; i < length; i++) {
@@ -24,16 +22,14 @@ Arguments *new_arguments() {
   return ret_value;
 }
 
-Arguments *get_args(Options *options, int argc, char *args[], char *version,
-                    int opt_len) {
+Arguments *get_args(Options *options, int argc, char *args[],
+                    const char *version, int opt_len) {
 
   bool *arguments = malloc(opt_len * sizeof(bool));
-  bool flag = false;
 
   Arguments *ret_value = new_arguments();
   ret_value->arguments = arguments;
-  uint32_t file_counter = 0;
-  ret_value->file_number = &file_counter;
+  int file_counter = 0;
 
   for (int i = 1; i < argc; i++) {
     if (strcmp(args[i], "\0") == 0) {
@@ -63,10 +59,10 @@ Arguments *get_args(Options *options, int argc, char *args[], char *version,
         }
       } else {
         *(ret_value->files + file_counter) = args[i];
-        // printf("File Pointer: helper func %p\n", ret_value->files);
         file_counter++;
       }
     }
   }
+  ret_value->file_number = file_counter;
   return ret_value;
 }

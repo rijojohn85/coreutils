@@ -1,6 +1,5 @@
 #include "../helpers/helpers.h"
 #include <stdbool.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -36,14 +35,12 @@ Options options[] = {
 int length = sizeof(options) / sizeof(options[0]);
 
 int main(int argc, char *args[]) {
-  // Arguments arg_list[10];
   char *st_in = NULL;
   size_t len = 0;
   ssize_t bytes_read;
   if (argc > 1) {
     Arguments *arg = get_args(options, argc, args, version, length);
     print_args(arg);
-    // printf("File Pointer:main func %p\n", (arg->files - 1));
 
     free(arg->arguments);
     free(arg);
@@ -57,15 +54,11 @@ int main(int argc, char *args[]) {
   return EXIT_SUCCESS;
 }
 void print_args(Arguments *arg) {
-  for (uint32_t i = 0; i < length; i++) {
+  for (int i = 0; i < length; i++) {
     if (*(arg->arguments + i) == true)
       printf("Option %s chosen\n", options[i].input);
   }
-  for (uint32_t i = 0; i < *arg->file_number + 1; i++) {
-    printf("File: %s\n", *(arg->files + i));
+  for (int i = 0; i < arg->file_number; i++) {
+    printf("File: %s\n", (arg->files[i]));
   }
-  // while ((arg->files) != NULL) {
-  //   printf("File: %s\n", *(arg->files));
-  //   arg->files++;
-  // }
 }
