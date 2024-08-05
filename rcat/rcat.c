@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+void print_args(Arguments *arg);
+
 const char *version = "rcat 0.0.1";
 bool a, b, E, n, s, T, v = false;
 
@@ -19,7 +21,7 @@ Options options[] = {
      "b"},
     {"-e", "", "equivalent to -vE", "e"},
     {"-E", "--show-ends", "display $ at the end of each line", "E"},
-    {"-n", "-number", "number all output lines", "n"},
+    {"-n", "--number", "number all output lines", "n"},
     {"-s", "--squeeze-blank", "suppress repeated empty output lines", "s"},
     {"-t", "", "equivalent to -vT", "t"},
     {"-T", "--show-tabs", "display TAB characters as ^I", "T"},
@@ -38,7 +40,10 @@ int main(int argc, char *args[]) {
   size_t len = 0;
   ssize_t bytes_read;
   if (argc > 1) {
-
+    Arguments *arg = get_args(options, argc, args, version, length);
+    print_args(arg);
+    free(arg->arguments);
+    free(arg);
   } else {
     bytes_read = getline(&st_in, &len, stdin);
     if (bytes_read != -1) {
@@ -47,4 +52,14 @@ int main(int argc, char *args[]) {
   }
   free(st_in);
   return EXIT_SUCCESS;
+}
+void print_args(Arguments *arg) {
+  for (uint32_t i = 0; i < length; i++) {
+    if (*(arg->arguments + i) == true)
+      printf("Option %s chosen\n", options[i].input);
+  }
+  while ((arg->files) != NULL) {
+    printf("File: %s\n", *(arg->files));
+    arg->files++;
+  }
 }
