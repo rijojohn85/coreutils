@@ -6,11 +6,12 @@
 
 void print_args(Arguments *arg);
 void read_stdin();
-void print_line(char *line, int line_no);
 void cat_function(Arguments *arg);
+void print_line(Arguments *arg, char *line, size_t prev_len);
+void add_num(char *line);
 
 const char *version = "rcat 0.0.1";
-bool si, a, b, E, n, s, T, v = false;
+int line_no = 1;
 
 char *examples =
     "EXAMPLES\ncat f - g\n\tOutput f's contents, then standard input, then g's "
@@ -38,6 +39,28 @@ Options options[] = {
 };
 int length = sizeof(options) / sizeof(options[0]);
 
+void print_line(Arguments *arg, char *line, size_t prev_len) {
+  if (((strlen(line) == 1) && prev_len == 1 &&
+       (*(arg->arguments + 7) == true))) {
+
+    return;
+  }
+
+  if (*arg->arguments + 3) {
+    if (strlen(line) > 1) {
+      add_num(line);
+    }
+  }
+  printf("%s", line);
+}
+void add_num(char *line) {
+  char *new_line = malloc(sizeof(line) + 3);
+  sprintf(new_line, "\t%d ", line_no);
+  strcat(new_line, line);
+  strcpy(line, new_line);
+  line_no++;
+  free(new_line);
+}
 int main(int argc, char *args[]) {
   if (argc > 1) {
     Arguments *arg = get_args(options, argc, args, version, length);
@@ -58,6 +81,7 @@ void print_args(Arguments *arg) {
     printf("File: %s\n", (arg->files[i]));
   }
 }
+
 void read_stdin() {
   char *st_in = NULL;
   size_t len = 0;
@@ -70,9 +94,11 @@ void read_stdin() {
   }
   free(st_in);
 }
+
 void cat_function(Arguments *arg) {
   char *st_in = NULL;
   size_t len = 0;
+  size_t prev_len = 0;
   ssize_t bytes_read;
   FILE *fp;
   if (*(arg->arguments + 1)) {
@@ -88,11 +114,9 @@ void cat_function(Arguments *arg) {
       exit(EXIT_FAILURE);
     }
     while ((bytes_read = getline(&st_in, &len, fp) != -1)) {
-      // TODO: add flag mods and move the print statement outside so it can be
-      // re-used by read_stdin
-      if (*(arg->arguments + 3)) {
-      }
-      printf("%s", st_in);
+
+      print_line(arg, st_in, prev_len);
+      prev_len = strlen(st_in);
     }
   }
   fclose(fp);
