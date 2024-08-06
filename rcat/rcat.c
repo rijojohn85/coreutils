@@ -7,6 +7,7 @@
 void print_args(Arguments *arg);
 void read_stdin();
 void print_line(char *line, int line_no);
+void cat_function(Arguments *arg);
 
 const char *version = "rcat 0.0.1";
 bool si, a, b, E, n, s, T, v = false;
@@ -40,17 +41,7 @@ int length = sizeof(options) / sizeof(options[0]);
 int main(int argc, char *args[]) {
   if (argc > 1) {
     Arguments *arg = get_args(options, argc, args, version, length);
-
-    if (*(arg->arguments)) {
-      si = true;
-      read_stdin();
-    }
-
-    if (*(arg->arguments)) {
-      si = true;
-      read_stdin();
-    }
-
+    cat_function(arg);
     free_arg(arg);
   } else {
     read_stdin();
@@ -77,5 +68,33 @@ void read_stdin() {
       printf("%s", st_in);
     }
   }
+  free(st_in);
+}
+void cat_function(Arguments *arg) {
+  char *st_in = NULL;
+  size_t len = 0;
+  ssize_t bytes_read;
+  FILE *fp;
+  if (*(arg->arguments + 1)) {
+    print_help(options, examples, useage, length);
+    free_arg(arg);
+    exit(EXIT_SUCCESS);
+  }
+  for (int i = 0; i < arg->file_number; i++) {
+    fp = fopen(arg->files[i], "r");
+    if (fp == NULL) {
+      fprintf(stderr, "Error: file %s not found\n", arg->files[i]);
+      free_arg(arg);
+      exit(EXIT_FAILURE);
+    }
+    while ((bytes_read = getline(&st_in, &len, fp) != -1)) {
+      // TODO: add flag mods and move the print statement outside so it can be
+      // re-used by read_stdin
+      if (*(arg->arguments + 3)) {
+      }
+      printf("%s", st_in);
+    }
+  }
+  fclose(fp);
   free(st_in);
 }

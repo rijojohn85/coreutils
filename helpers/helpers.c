@@ -40,6 +40,7 @@ Arguments *get_args(Options *options, int argc, char *args[],
       return ret_value;
     } else if ((strcmp(args[i], "--version") == 0)) {
       printf("%s\n", version);
+      free_arg(ret_value);
       exit(EXIT_SUCCESS);
     } else {
       if (strncmp(args[i], "--", 2) == 0) {
