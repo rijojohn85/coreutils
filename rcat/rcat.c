@@ -9,6 +9,7 @@ void read_stdin();
 void cat_function(Arguments *arg);
 void print_line(Arguments *arg, char *line, size_t prev_len);
 void add_num(char *line);
+void add_non_print(char *line);
 
 const char *version = "rcat 0.0.1";
 int line_no = 1;
@@ -40,12 +41,13 @@ Options options[] = {
 int length = sizeof(options) / sizeof(options[0]);
 
 void print_line(Arguments *arg, char *line, size_t prev_len) {
+  if (*(arg->arguments + 11) && (strlen(line) > 1)) {
+    add_non_print(line);
+  }
   if (((strlen(line) == 1) && prev_len == 1 &&
        (*(arg->arguments + 7) == true))) {
-
     return;
   }
-
   if (*arg->arguments + 3) {
     if (strlen(line) > 1) {
       add_num(line);
@@ -53,6 +55,19 @@ void print_line(Arguments *arg, char *line, size_t prev_len) {
   }
   printf("%s", line);
 }
+void add_non_print(char *line) {
+  // create a new buffer and add chars to that;
+  size_t pos = 0;
+  while (pos < strlen(line)) {
+    if ((*(line + pos)) >= 'a' && (*(line + pos) <= 'Z')) {
+      continue;
+    }
+    if ((*(line + pos) == '\n') || (*(line + pos) == '\t')) {
+      continue;
+    }
+  }
+}
+
 void add_num(char *line) {
   char *new_line = malloc(sizeof(line) + 3);
   sprintf(new_line, "\t%d ", line_no);
@@ -61,6 +76,7 @@ void add_num(char *line) {
   line_no++;
   free(new_line);
 }
+
 int main(int argc, char *args[]) {
   if (argc > 1) {
     Arguments *arg = get_args(options, argc, args, version, length);
@@ -71,12 +87,12 @@ int main(int argc, char *args[]) {
   }
   return EXIT_SUCCESS;
 }
+
 void print_args(Arguments *arg) {
   for (int i = 0; i < length; i++) {
     if (*(arg->arguments + i) == true)
       printf("Option %s chosen\n", options[i].input);
   }
-
   for (int i = 0; i < arg->file_number; i++) {
     printf("File: %s\n", (arg->files[i]));
   }
@@ -108,6 +124,7 @@ void cat_function(Arguments *arg) {
   }
   for (int i = 0; i < arg->file_number; i++) {
     fp = fopen(arg->files[i], "r");
+
     if (fp == NULL) {
       fprintf(stderr, "Error: file %s not found\n", arg->files[i]);
       free_arg(arg);
