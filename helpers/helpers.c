@@ -30,7 +30,7 @@ Arguments *get_args(Options *options, int argc, char *args[],
   Arguments *ret_value = new_arguments();
   ret_value->arguments = arguments;
   int file_counter = 0;
-
+  // TODO: getting segmentation fault when unknown is entered.
   for (int i = 1; i < argc; i++) {
     if (strcmp(args[i], "\0") == 0) {
       break;
