@@ -1,6 +1,7 @@
 #ifndef HELPERS
 #define HELPERS
 #include <stdbool.h>
+#include <stdio.h>
 typedef struct {
   char *input;
   char *alt_inpt;
@@ -27,4 +28,16 @@ Arguments *get_args(Options *options, int argc, char *args[],
  * frees argument variable
  */
 void free_arg(Arguments *arg);
+/*
+ *
+ * Read a line of arbitrary size from a file
+ * Returns a pointer to the line.
+ * Returns NULL on EOF or error.
+
+ * It's up to the caller to free() this pointer when done with it.
+
+ * Note that this strips the newline from the result. If you need
+ *it in there, probably best to switch this to a do-while.
+ */
+char *readline(FILE *fp);
 #endif

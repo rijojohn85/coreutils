@@ -13,6 +13,7 @@ void add_non_print(char *line);
 
 const char *version = "rcat 0.0.1";
 int line_no = 1;
+bool prev_blank = false;
 
 char *examples =
     "EXAMPLES\ncat f - g\n\tOutput f's contents, then standard input, then g's "
@@ -41,19 +42,21 @@ Options options[] = {
 int length = sizeof(options) / sizeof(options[0]);
 
 void print_line(Arguments *arg, char *line, size_t prev_len) {
-  if (*(arg->arguments + 11) && (strlen(line) > 1)) {
-    add_non_print(line);
-  }
-  if (((strlen(line) == 1) && prev_len == 1 &&
+  if (((strlen(line) == 0) && (prev_len == 0) &&
        (*(arg->arguments + 7) == true))) {
     return;
   }
-  if (*arg->arguments + 3) {
+  if ((*(arg->arguments + 11)) == true && (strlen(line) > 1)) {
+    add_non_print(line);
+  }
+  if (*(arg->arguments + 3)) {
     if (strlen(line) > 1) {
       add_num(line);
     }
+  } else if ((*(arg->arguments + 6))) {
+    add_num(line);
   }
-  printf("%s", line);
+  printf("%s\n", line);
 }
 void add_non_print(char *line) {
   // create a new buffer and add chars to that;
@@ -81,6 +84,7 @@ int main(int argc, char *args[]) {
   if (argc > 1) {
     Arguments *arg = get_args(options, argc, args, version, length);
     cat_function(arg);
+    // print_args(arg);
     free_arg(arg);
   } else {
     read_stdin();
@@ -112,11 +116,9 @@ void read_stdin() {
 }
 
 void cat_function(Arguments *arg) {
-  char *st_in = NULL;
-  size_t len = 0;
-  size_t prev_len = 0;
-  ssize_t bytes_read;
+  char *st_in;
   FILE *fp;
+  size_t len, prev_len = 1;
   if (*(arg->arguments + 1)) {
     print_help(options, examples, useage, length);
     free_arg(arg);
@@ -130,10 +132,13 @@ void cat_function(Arguments *arg) {
       free_arg(arg);
       exit(EXIT_FAILURE);
     }
-    while ((bytes_read = getline(&st_in, &len, fp) != -1)) {
+    // https://beej.us/guide/bgc/html/split/manual-memory-allocation.html#reading-in-lines-of-arbitrary-length
+    // need to implement this.
+    while ((st_in = readline(fp)) != NULL) {
 
+      len = strlen(st_in);
       print_line(arg, st_in, prev_len);
-      prev_len = strlen(st_in);
+      prev_len = len;
     }
   }
   fclose(fp);

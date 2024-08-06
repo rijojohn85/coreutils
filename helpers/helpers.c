@@ -74,3 +74,50 @@ void free_arg(Arguments *arg) {
   free(arg->arguments);
   free(arg);
 }
+
+char *readline(FILE *fp) {
+  size_t offset = 0;  // Index next char goes in the buffer
+  size_t bufsize = 4; // initial size of the buffer. preferably multiple of 2
+  char *buf;          // the buffer
+  int c;              // the character we are going to read.
+
+  buf = malloc(bufsize); // allocate inital buffer
+
+  while (c = fgetc(fp), c != '\n' && c != EOF) {
+    // check if we're out of room in the buffer account for the extra byte for
+    // the NULL terminator
+    if (offset == bufsize - 1) { //-1 for the null terminator.
+      bufsize *= 2;
+      char *new_buf = realloc(buf, bufsize);
+      if (new_buf == NULL) {
+        free(buf); // bail on error
+        perror("Error in realloc\n");
+        exit(EXIT_FAILURE);
+      }
+      buf = new_buf; // successful realloc
+    }
+    buf[offset++] = c; // add the byte onto the buffer
+  }
+  // we hit newline or EOF
+  //
+  // if at EOF and we read no bytes, free the buffer and return NULL to indicate
+  // we've hit EOF
+  if (c == EOF && offset == 0) {
+    free(buf);
+    return NULL;
+  }
+
+  // shrink to fit
+  if (offset < bufsize - 1) {
+    char *new_buf = realloc(buf, offset + 1); //+1 for the null terminator
+    if (new_buf == NULL) {
+      free(buf); // bail on error
+      perror("Error in realloc\n");
+      exit(EXIT_FAILURE);
+    }
+    buf = new_buf; // successful realloc
+  }
+  // Add the nul terminator
+  buf[offset] = '\0';
+  return buf;
+}
