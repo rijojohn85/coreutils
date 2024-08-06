@@ -36,7 +36,7 @@ Arguments *get_args(Options *options, int argc, char *args[],
       break;
     }
     if ((strcmp(args[i], "-h") == 0) || strcmp(args[i], "--help") == 0) {
-      *(ret_value->arguments + 10) = true;
+      *(ret_value->arguments + 1) = true;
       return ret_value;
     } else if ((strcmp(args[i], "--version") == 0)) {
       printf("%s\n", version);
@@ -57,6 +57,8 @@ Arguments *get_args(Options *options, int argc, char *args[],
             }
           }
         }
+      } else if ((strcmp(args[i], "-") == 0)) {
+        *(ret_value->arguments + 0) = true;
       } else {
         *(ret_value->files + file_counter) = args[i];
         file_counter++;

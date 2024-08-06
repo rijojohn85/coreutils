@@ -5,9 +5,11 @@
 #include <string.h>
 
 void print_args(Arguments *arg);
+void read_stdin();
+void print_line(char *line, int line_no);
 
 const char *version = "rcat 0.0.1";
-bool a, b, E, n, s, T, v = false;
+bool si, a, b, E, n, s, T, v = false;
 
 char *examples =
     "EXAMPLES\ncat f - g\n\tOutput f's contents, then standard input, then g's "
@@ -16,6 +18,8 @@ char *useage =
     "Usage: gcat [OPTION]... [FILE]...\n\nConcatenate FILE(s) to standard "
     "output.\n\nWith no FILE, or when FILE is -, read standard input.\n";
 Options options[] = {
+    {"-", "", "standard input", "-"},
+    {"-h", "--help", "displays this help and exit.", "h"},
     {"-A", "--show-all", "equivalent to -vET", "A"},
     {"-b", "number-nonblank", "number non empty output lines, overrides -n",
      "b"},
@@ -28,32 +32,29 @@ Options options[] = {
     {"-u", "", "(ignored)", "u"},
     {"-v", "--show-nonprinting", "use ^ and M- notation except for LFD and TAB",
      "v"},
-    {"-h", "--help", "displays this help and exit.", "h"},
-    {"--version", "", "output version information and exit", ""}
+    {"--version", "", "output version information and exit", ""},
 
 };
 int length = sizeof(options) / sizeof(options[0]);
 
 int main(int argc, char *args[]) {
-  char *st_in = NULL;
-  size_t len = 0;
-  ssize_t bytes_read = 0;
   if (argc > 1) {
     Arguments *arg = get_args(options, argc, args, version, length);
-    print_args(arg);
+
+    if (*(arg->arguments)) {
+      si = true;
+      read_stdin();
+    }
+
+    if (*(arg->arguments)) {
+      si = true;
+      read_stdin();
+    }
 
     free_arg(arg);
   } else {
-    while (bytes_read != -1) {
-      // TODO: need to work on this shit.
-      bytes_read = getline(&st_in, &len, stdin);
-      if (bytes_read != -1) {
-        printf("%s", st_in);
-        break;
-      }
-    }
+    read_stdin();
   }
-  free(st_in);
   return EXIT_SUCCESS;
 }
 void print_args(Arguments *arg) {
@@ -61,7 +62,20 @@ void print_args(Arguments *arg) {
     if (*(arg->arguments + i) == true)
       printf("Option %s chosen\n", options[i].input);
   }
+
   for (int i = 0; i < arg->file_number; i++) {
     printf("File: %s\n", (arg->files[i]));
   }
+}
+void read_stdin() {
+  char *st_in = NULL;
+  size_t len = 0;
+  ssize_t bytes_read = 0;
+  while (bytes_read != -1) {
+    bytes_read = getline(&st_in, &len, stdin);
+    if (bytes_read != -1) {
+      printf("%s", st_in);
+    }
+  }
+  free(st_in);
 }
