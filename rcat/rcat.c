@@ -135,7 +135,6 @@ void cat_function(Arguments *arg) {
     // https://beej.us/guide/bgc/html/split/manual-memory-allocation.html#reading-in-lines-of-arbitrary-length
     // need to implement this.
     while ((st_in = readline(fp)) != NULL) {
-
       len = strlen(st_in);
       print_line(arg, st_in, prev_len);
       prev_len = len;

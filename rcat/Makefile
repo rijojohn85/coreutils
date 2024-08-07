@@ -1,9 +1,9 @@
 rcat: rcat.o helpers.o
-	gcc-14 rcat.o helpers.o -o bin/rcat
+	clang rcat.o helpers.o -o bin/rcat
 rcat.o: rcat.c  ../helpers/helpers.h
-	gcc-14 -c rcat.c
+	clang -c rcat.c
 helpers.o: ../helpers/helpers.c ../helpers/helpers.h
-	gcc-14 -c ../helpers/helpers.c
+	clang -c ../helpers/helpers.c
 run: rcat
 	bin/rcat
 clean:
