@@ -72,9 +72,17 @@ void add_non_print(char *line) {
 }
 
 void add_num(char *line) {
-  char *new_line = malloc(sizeof(line) + 3);
+  char *new_line = malloc(sizeof(*line) + 3);
   sprintf(new_line, "\t%d ", line_no);
   strcat(new_line, line);
+  char *temp = realloc(line, sizeof(new_line) + 3);
+  if (temp == NULL) {
+    perror("realloc error\n");
+    free(new_line);
+    free(line);
+    exit(EXIT_FAILURE);
+  }
+  line = temp;
   strcpy(line, new_line);
   line_no++;
   free(new_line);
@@ -117,6 +125,7 @@ void read_stdin() {
 
 void cat_function(Arguments *arg) {
   char *st_in;
+  char *line = NULL;
   FILE *fp;
   size_t len, prev_len = 1;
   if (*(arg->arguments + 1)) {
@@ -126,20 +135,19 @@ void cat_function(Arguments *arg) {
   }
   for (int i = 0; i < arg->file_number; i++) {
     fp = fopen(arg->files[i], "r");
-
     if (fp == NULL) {
       fprintf(stderr, "Error: file %s not found\n", arg->files[i]);
       free_arg(arg);
       exit(EXIT_FAILURE);
     }
-    // https://beej.us/guide/bgc/html/split/manual-memory-allocation.html#reading-in-lines-of-arbitrary-length
-    // need to implement this.
     while ((st_in = readline(fp)) != NULL) {
-      len = strlen(st_in);
-      print_line(arg, st_in, prev_len);
+      line = malloc(sizeof(*(st_in)));
+      strcpy(line, st_in);
+      free(st_in);
+      len = strlen(line);
+      print_line(arg, line, prev_len);
       prev_len = len;
     }
   }
   fclose(fp);
-  free(st_in);
 }
