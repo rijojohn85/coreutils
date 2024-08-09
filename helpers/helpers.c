@@ -61,8 +61,6 @@ Arguments *get_args(Options *options, int argc, char *args[],
       } else if ((strcmp(args[i], "-") == 0)) {
         *(ret_value->arguments + 0) = true;
       } else {
-        ret_value->files[file_counter] = realloc(
-            ret_value->files[file_counter], sizeof(char) * strlen(args[i]));
         ret_value->files[file_counter] = args[i];
         file_counter++;
       }
@@ -73,9 +71,6 @@ Arguments *get_args(Options *options, int argc, char *args[],
 }
 
 void free_arg(Arguments *arg) {
-  for (int i = 0; i < arg->file_number; i++) {
-    free(arg->files[i]);
-  }
   free(arg->arguments);
   free(arg);
 }

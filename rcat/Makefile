@@ -8,6 +8,7 @@ run: rcat
 	bin/rcat
 clean:
 	rm -f bin/rcat
+	rm -f *.o
 
 format: *.c
 	gcc-format -style=Google -i *.c

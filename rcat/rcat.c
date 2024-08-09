@@ -46,17 +46,14 @@ void print_line(Arguments *arg, char *line, size_t prev_len) {
        (*(arg->arguments + 7) == true))) {
     return;
   }
-  if ((*(arg->arguments + 11)) == true && (strlen(line) > 1)) {
-    add_non_print(line);
+  if ((arg->arguments + 6) && !(arg->arguments + 3)) {
+    printf("\t%d %s\n", line_no, line);
+    line_no++;
+  } else if ((arg->arguments + 3) && strlen(line) > 0) {
+
+    printf("\t%d %s\n", line_no, line);
+    line_no++;
   }
-  if (*(arg->arguments + 3)) {
-    if (strlen(line) > 1) {
-      add_num(line);
-    }
-  } else if ((*(arg->arguments + 6))) {
-    add_num(line);
-  }
-  printf("%s\n", line);
 }
 void add_non_print(char *line) {
   // create a new buffer and add chars to that;
@@ -72,18 +69,17 @@ void add_non_print(char *line) {
 }
 
 void add_num(char *line) {
-  char *new_line = malloc((sizeof(char) * strlen(line)) + 3);
-  sprintf(new_line, "\t%d ", line_no);
+  char *new_line = malloc((sizeof(*line)) + 3);
   strcat(new_line, line);
-  char *temp = realloc(line, sizeof(new_line) + 3);
+  char *temp = realloc(line, sizeof(*new_line) + 3);
   if (temp == NULL) {
     perror("realloc error\n");
     free(new_line);
     free(line);
     exit(EXIT_FAILURE);
   }
+  strcpy(temp, new_line);
   line = temp;
-  strcpy(line, new_line);
   line_no++;
   free(new_line);
 }
@@ -141,13 +137,12 @@ void cat_function(Arguments *arg) {
       exit(EXIT_FAILURE);
     }
     while ((st_in = readline(fp)) != NULL) {
-      line = malloc(sizeof(char) * strlen(st_in));
-      strcpy(line, st_in);
-      free(st_in);
-      len = strlen(line);
-      print_line(arg, line, prev_len);
+      len = strlen(st_in);
+      print_line(arg, st_in, prev_len);
       prev_len = len;
+      free(st_in);
     }
   }
+
   fclose(fp);
 }
