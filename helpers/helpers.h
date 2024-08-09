@@ -11,7 +11,7 @@ typedef struct {
 typedef struct {
   bool *arguments;
   int file_number;
-  void *files[];
+  char *files[];
 } Arguments;
 
 /*

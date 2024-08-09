@@ -5,7 +5,7 @@
 #include <string.h>
 
 void print_args(Arguments *arg);
-void read_stdin();
+void read_stdin(Arguments *arg);
 void cat_function(Arguments *arg);
 void print_line(Arguments *arg, char *line, size_t prev_len);
 char *add_non_print(char *line, Arguments *arg);
@@ -135,13 +135,13 @@ void print_line(Arguments *arg, char *line, size_t prev_len) {
 }
 
 int main(int argc, char *args[]) {
-  if (argc > 1) {
-    Arguments *arg = get_args(options, argc, args, version, length);
+  Arguments *arg = get_args(options, argc, args, version, length);
+  if (arg->file_number >= 1) {
     cat_function(arg);
     // print_args(arg);
     free_arg(arg);
   } else {
-    read_stdin();
+    read_stdin(arg);
   }
   return EXIT_SUCCESS;
 }
@@ -156,17 +156,25 @@ void print_args(Arguments *arg) {
   }
 }
 
-void read_stdin() {
+void read_stdin(Arguments *arg) {
   char *st_in = NULL;
-  size_t len = 0;
+  size_t len = 0, prev_len = 1;
   ssize_t bytes_read = 0;
-  while (bytes_read != -1) {
-    bytes_read = getline(&st_in, &len, stdin);
-    if (bytes_read != -1) {
-      printf("%s", st_in);
-    }
+  // while (bytes_read != -1) {
+  //   bytes_read = getline(&st_in, &len, stdin);
+  //   if (bytes_read != -1) {
+  //     len = strlen(st_in);
+  //     print_line(arg, st_in, prev_len);
+  //     prev_len = len;
+  //   }
+  // }
+
+  while ((st_in = readline(stdin)) != NULL) {
+    len = strlen(st_in);
+    print_line(arg, st_in, prev_len);
+    prev_len = len;
+    free(st_in);
   }
-  free(st_in);
 }
 
 void cat_function(Arguments *arg) {
