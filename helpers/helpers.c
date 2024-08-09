@@ -12,16 +12,6 @@ void print_help(Options *options, char *examples, char *useage, int length) {
   printf("%s", examples);
 }
 
-Arguments *new_arguments(int argc) {
-  Arguments *ret_value = (Arguments *)malloc(sizeof(Arguments));
-  if (ret_value == NULL) {
-    printf("Malloc error.\n");
-    exit(EXIT_FAILURE);
-  }
-  ret_value->arguments = NULL;
-  return ret_value;
-}
-
 Arguments *get_args(Options *options, int argc, char *args[],
                     const char *version, int opt_len) {
 

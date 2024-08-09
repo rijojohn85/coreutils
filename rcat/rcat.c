@@ -43,7 +43,6 @@ char *add_non_print(char *line, Arguments *arg) {
   char *buf = NULL;
   size_t buf_size = sizeof(char) * 4;
   size_t pos = 0;
-  char c;
   buf = malloc(buf_size);
   // create a new buffer and add chars to that;
   while (*line) {
@@ -164,7 +163,6 @@ void read_stdin(Arguments *arg) {
   }
   char *st_in = NULL;
   size_t len = 0, prev_len = 1;
-  ssize_t bytes_read = 0;
   // while (bytes_read != -1) {
   //   bytes_read = getline(&st_in, &len, stdin);
   //   if (bytes_read != -1) {
@@ -184,7 +182,6 @@ void read_stdin(Arguments *arg) {
 
 void cat_function(Arguments *arg) {
   char *st_in;
-  char *line = NULL;
   FILE *fp;
   size_t len, prev_len = 1;
   if (*(arg->arguments + 1)) {
