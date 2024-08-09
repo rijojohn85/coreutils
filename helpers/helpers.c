@@ -34,8 +34,8 @@ Arguments *get_args(Options *options, int argc, char *args[],
                                 sizeof(char *) * argc);
 
   ret_value->arguments = arguments;
-  // TODO: getting segmentation fault when unknown is entered.
   for (int i = 1; i < argc; i++) {
+    bool flag = false;
     if (strcmp(args[i], "\0") == 0) {
       break;
     }
@@ -49,17 +49,32 @@ Arguments *get_args(Options *options, int argc, char *args[],
     } else {
       if (strncmp(args[i], "--", 2) == 0) {
         for (int j = 0; j < opt_len; j++) {
-          if (strcmp(options[j].alt_inpt, args[i]) == 0)
+          if (strcmp(options[j].alt_inpt, args[i]) == 0) {
+
             *(ret_value->arguments + j) = true;
+            flag = true;
+          }
+        }
+        if (!flag) {
+          fprintf(stderr, "Invalid option %s\n", args[i]);
+          free_arg(ret_value);
+          exit(EXIT_SUCCESS);
         }
       } else if ((strncmp(args[i], "-", 1) == 0) && strlen(args[i]) > 1) {
         for (int k = 1; k < (int)strlen(args[i]); k++) {
+          flag = false;
           for (int j = 0; j < opt_len; j++) {
             // printf("%c", args[i][k]);
             if (*options[j].search_char == args[i][k]) {
               *(ret_value->arguments + j) = true;
+              flag = true;
               break;
             }
+          }
+          if (!flag) {
+            fprintf(stderr, "Invalid option %c\n", args[i][k]);
+            free_arg(ret_value);
+            exit(EXIT_SUCCESS);
           }
         }
       } else if ((strcmp(args[i], "-") == 0)) {

@@ -157,6 +157,11 @@ void print_args(Arguments *arg) {
 }
 
 void read_stdin(Arguments *arg) {
+  if (*(arg->arguments + 1)) {
+    print_help(options, examples, useage, length);
+    free_arg(arg);
+    exit(EXIT_SUCCESS);
+  }
   char *st_in = NULL;
   size_t len = 0, prev_len = 1;
   ssize_t bytes_read = 0;
