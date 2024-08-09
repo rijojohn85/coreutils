@@ -61,8 +61,7 @@ Arguments *get_args(Options *options, int argc, char *args[],
       } else if ((strcmp(args[i], "-") == 0)) {
         *(ret_value->arguments + 0) = true;
       } else {
-        ret_value->files[file_counter] = args[i];
-        file_counter++;
+        ret_value->files[file_counter++] = args[i];
       }
     }
   }

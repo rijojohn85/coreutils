@@ -1,4 +1,5 @@
 #include "../helpers/helpers.h"
+#include <ctype.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,8 +9,7 @@ void print_args(Arguments *arg);
 void read_stdin();
 void cat_function(Arguments *arg);
 void print_line(Arguments *arg, char *line, size_t prev_len);
-void add_num(char *line);
-void add_non_print(char *line);
+char *add_non_print(char *line, Arguments *arg);
 
 const char *version = "rcat 0.0.1";
 int line_no = 1;
@@ -40,48 +40,84 @@ Options options[] = {
 
 };
 int length = sizeof(options) / sizeof(options[0]);
+char *add_non_print(char *line, Arguments *arg) {
+  char *buf = NULL;
+  size_t buf_size = sizeof(char) * 4;
+  size_t pos = 0;
+  char c;
+  buf = malloc(buf_size);
+  // create a new buffer and add chars to that;
+  while (*line) {
+    if (pos == buf_size - 2) { //-1 for the null terminator.
+      buf_size *= 2;
+      char *new_buf = realloc(buf, buf_size);
+      if (new_buf == NULL) {
+        free(buf); // bail on error
+        perror("Error in realloc\n");
+        exit(EXIT_FAILURE);
+      }
+      buf = new_buf; // successful realloc
+    }
+    // buf[pos++] = c; // add the byte onto the buffer
+    if (*(arg->arguments + 2) || *(arg->arguments + 4) ||
+        *(arg->arguments + 8) || *(arg->arguments + 9) ||
+        *(arg->arguments + 11)) {
+      if (*(arg->arguments + 8) || *(arg->arguments + 9)) {
+        if (*line == '\t') {
+
+          buf[pos++] = '^';
+          buf[pos++] = 'I';
+        }
+      }
+      if (*(arg->arguments + 2) || *(arg->arguments + 4) ||
+          *(arg->arguments + 8) || *(arg->arguments + 11)) {
+      }
+      if ((unsigned char)*line < 32 || (unsigned char)*line == 127) {
+        buf[pos++] = '^';
+        buf[pos++] = 'M';
+      } else {
+        buf[pos++] = *line;
+      }
+      line++;
+    }
+  }
+  // shrink to fit
+  if (pos < buf_size - 2) {
+    char *new_buf = realloc(buf, pos + 2); //+1 for the null terminator
+    if (new_buf == NULL) {
+      free(buf); // bail on error
+      perror("Error in realloc\n");
+      exit(EXIT_FAILURE);
+    }
+    buf = new_buf; // successful realloc
+  }
+  if (*(arg->arguments + 2) || *(arg->arguments + 4) || *(arg->arguments + 5)) {
+    buf[pos++] = '$';
+  }
+  // Add the nul terminator
+  buf[pos] = '\0';
+  return buf;
+}
 
 void print_line(Arguments *arg, char *line, size_t prev_len) {
-  if (((strlen(line) == 0) && (prev_len == 0) &&
-       (*(arg->arguments + 7) == true))) {
+  size_t len = strlen(line);
+  if ((len == 0) && (prev_len == 0) && (*(arg->arguments + 7) == true)) {
     return;
   }
-  if ((arg->arguments + 6) && !(arg->arguments + 3)) {
-    printf("\t%d %s\n", line_no, line);
+  if ((*(arg->arguments + 6) == true) && *(arg->arguments + 3) == false) {
+    char *s = add_non_print(line);
+    printf("\t%d %s\n", line_no, s);
+    free(s);
     line_no++;
-  } else if ((arg->arguments + 3) && strlen(line) > 0) {
+  } else if (*(arg->arguments + 3) && len > 0) {
 
-    printf("\t%d %s\n", line_no, line);
+    char *s = add_non_print(line);
+    printf("\t%d %s\n", line_no, s);
+    free(s);
     line_no++;
+  } else if (*(arg->arguments + 3) && len == 0) {
+    printf("\n");
   }
-}
-void add_non_print(char *line) {
-  // create a new buffer and add chars to that;
-  size_t pos = 0;
-  while (pos < strlen(line)) {
-    if ((*(line + pos)) >= 'a' && (*(line + pos) <= 'Z')) {
-      continue;
-    }
-    if ((*(line + pos) == '\n') || (*(line + pos) == '\t')) {
-      continue;
-    }
-  }
-}
-
-void add_num(char *line) {
-  char *new_line = malloc((sizeof(*line)) + 3);
-  strcat(new_line, line);
-  char *temp = realloc(line, sizeof(*new_line) + 3);
-  if (temp == NULL) {
-    perror("realloc error\n");
-    free(new_line);
-    free(line);
-    exit(EXIT_FAILURE);
-  }
-  strcpy(temp, new_line);
-  line = temp;
-  line_no++;
-  free(new_line);
 }
 
 int main(int argc, char *args[]) {
