@@ -72,7 +72,7 @@ void add_non_print(char *line) {
 }
 
 void add_num(char *line) {
-  char *new_line = malloc(sizeof(*line) + 3);
+  char *new_line = malloc((sizeof(char) * strlen(line)) + 3);
   sprintf(new_line, "\t%d ", line_no);
   strcat(new_line, line);
   char *temp = realloc(line, sizeof(new_line) + 3);
@@ -141,7 +141,7 @@ void cat_function(Arguments *arg) {
       exit(EXIT_FAILURE);
     }
     while ((st_in = readline(fp)) != NULL) {
-      line = malloc(sizeof(*(st_in)));
+      line = malloc(sizeof(char) * strlen(st_in));
       strcpy(line, st_in);
       free(st_in);
       len = strlen(line);
