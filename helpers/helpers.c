@@ -12,7 +12,7 @@ void print_help(Options *options, char *examples, char *useage, int length) {
   printf("%s", examples);
 }
 
-Arguments *new_arguments() {
+Arguments *new_arguments(int argc) {
   Arguments *ret_value = (Arguments *)malloc(sizeof(Arguments));
   if (ret_value == NULL) {
     printf("Malloc error.\n");
@@ -26,9 +26,11 @@ Arguments *get_args(Options *options, int argc, char *args[],
                     const char *version, int opt_len) {
 
   bool *arguments = malloc(opt_len * sizeof(bool));
+  void *files = malloc(sizeof(char *) * argc);
 
-  Arguments *ret_value = new_arguments();
+  Arguments *ret_value = new_arguments(argc);
   ret_value->arguments = arguments;
+  *ret_value->files = files;
   int file_counter = 0;
   // TODO: getting segmentation fault when unknown is entered.
   for (int i = 1; i < argc; i++) {
@@ -61,7 +63,8 @@ Arguments *get_args(Options *options, int argc, char *args[],
       } else if ((strcmp(args[i], "-") == 0)) {
         *(ret_value->arguments + 0) = true;
       } else {
-        ret_value->files[file_counter++] = args[i];
+        ret_value->files[file_counter++] = &args[i];
+        printf("%s\n", (char *)ret_value->files[file_counter - 1]);
       }
     }
   }

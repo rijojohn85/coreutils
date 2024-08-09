@@ -1,5 +1,4 @@
 #include "../helpers/helpers.h"
-#include <ctype.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -48,8 +47,8 @@ char *add_non_print(char *line, Arguments *arg) {
   buf = malloc(buf_size);
   // create a new buffer and add chars to that;
   while (*line) {
-    if (pos == buf_size - 2) { //-1 for the null terminator.
-      buf_size *= 2;
+    if (pos == buf_size - 4) { //-1 for the null terminator.
+      buf_size *= 4;
       char *new_buf = realloc(buf, buf_size);
       if (new_buf == NULL) {
         free(buf); // bail on error
@@ -59,27 +58,36 @@ char *add_non_print(char *line, Arguments *arg) {
       buf = new_buf; // successful realloc
     }
     // buf[pos++] = c; // add the byte onto the buffer
-    if (*(arg->arguments + 2) || *(arg->arguments + 4) ||
-        *(arg->arguments + 8) || *(arg->arguments + 9) ||
-        *(arg->arguments + 11)) {
-      if (*(arg->arguments + 8) || *(arg->arguments + 9)) {
-        if (*line == '\t') {
-
-          buf[pos++] = '^';
-          buf[pos++] = 'I';
-        }
-      }
+    if ((unsigned char)*line < 32 || (unsigned char)*line == 127) {
       if (*(arg->arguments + 2) || *(arg->arguments + 4) ||
-          *(arg->arguments + 8) || *(arg->arguments + 11)) {
-      }
-      if ((unsigned char)*line < 32 || (unsigned char)*line == 127) {
-        buf[pos++] = '^';
-        buf[pos++] = 'M';
+          *(arg->arguments + 8) || *(arg->arguments + 9) ||
+          *(arg->arguments + 11)) {
+        if (*(arg->arguments + 2) || *(arg->arguments + 8) ||
+            *(arg->arguments + 9)) {
+          if (*line == '\t') {
+
+            buf[pos++] = '^';
+            buf[pos++] = 'I';
+            line++;
+            continue;
+          }
+        }
+        if ((*(arg->arguments + 2) || *(arg->arguments + 4) ||
+             *(arg->arguments + 8) || *(arg->arguments + 11)) &&
+            (*line != '\t')) {
+          buf[pos++] = '^';
+          buf[pos++] = 'M';
+          line++;
+          continue;
+        }
+        buf[pos++] = *line;
       } else {
         buf[pos++] = *line;
       }
-      line++;
+    } else {
+      buf[pos++] = *line;
     }
+    line++;
   }
   // shrink to fit
   if (pos < buf_size - 2) {
@@ -105,18 +113,24 @@ void print_line(Arguments *arg, char *line, size_t prev_len) {
     return;
   }
   if ((*(arg->arguments + 6) == true) && *(arg->arguments + 3) == false) {
-    char *s = add_non_print(line);
+    char *s = add_non_print(line, arg);
     printf("\t%d %s\n", line_no, s);
     free(s);
     line_no++;
   } else if (*(arg->arguments + 3) && len > 0) {
 
-    char *s = add_non_print(line);
+    char *s = add_non_print(line, arg);
     printf("\t%d %s\n", line_no, s);
     free(s);
     line_no++;
   } else if (*(arg->arguments + 3) && len == 0) {
     printf("\n");
+  } else {
+
+    char *s = add_non_print(line, arg);
+    printf("%s\n", s);
+    free(s);
+    line_no++;
   }
 }
 
@@ -138,7 +152,7 @@ void print_args(Arguments *arg) {
       printf("Option %s chosen\n", options[i].input);
   }
   for (int i = 0; i < arg->file_number; i++) {
-    printf("File: %s\n", (arg->files[i]));
+    printf("File: %s\n", (char *)(arg->files[i]));
   }
 }
 
@@ -168,7 +182,7 @@ void cat_function(Arguments *arg) {
   for (int i = 0; i < arg->file_number; i++) {
     fp = fopen(arg->files[i], "r");
     if (fp == NULL) {
-      fprintf(stderr, "Error: file %s not found\n", arg->files[i]);
+      fprintf(stderr, "Error: file %s not found\n", (char *)arg->files[i]);
       free_arg(arg);
       exit(EXIT_FAILURE);
     }
