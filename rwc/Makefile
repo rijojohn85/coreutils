@@ -1,13 +1,11 @@
-rcat: rcat.o helpers.o
-	gcc -g rcat.o helpers.o -o bin/rcat
-rcat.o: rcat.c  ../helpers/helpers.h
-	gcc -g -c rcat.c
-helpers.o: ../helpers/helpers.c ../helpers/helpers.h
-	gcc -g -c ../helpers/helpers.c
-run: rcat
-	bin/rcat
+rwc: rwc.o
+	gcc -g rwc.o -o bin/rwc
+rwc.o: rwc.c 
+	gcc -g -c rwc.c
+run: rwc
+	bin/rwc
 clean:
-	rm -f bin/rcat
+	rm -f bin/rwc
 	rm -f *.o
 
 format: *.c
