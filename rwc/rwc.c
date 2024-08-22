@@ -1,7 +1,11 @@
 #include <argp.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <wchar.h>
 
+static error_t parse_opt(int key, char *arg, struct argp_state *state);
+
+void run_process(char *file_name);
 const char *argp_program_bugaddress = "rijojohn85@gmail.com";
 const char *argp_program_version = "rwc - 0.0.1";
 static char doc[] = "wc - print newline, word and byte counts for each file";
@@ -73,16 +77,30 @@ int main(int argc, char **argv) {
   //        "VERBOSE = %s\nSILENT = %s\n",
   //        arguments.args[0], arguments.args[1], arguments.output_file,
   //        arguments.verbose ? "yes" : "no", arguments.silent ? "yes" : "no");
-  printf("Files: ");
   for (int i = 0; arguments.files[i]; i++) {
-    printf("%s ", arguments.files[i]);
+    run_process(arguments.files[i]);
   }
-  printf("\n");
-  printf("BYTES: %s\nCHARS: %s\nLINES: %s\nMAX-LINE-LENGTH: %s\nWORDS: %s\n",
-         arguments.bytes ? "yes" : "no", arguments.chars ? "yes" : "no",
-         arguments.lines ? "yes" : "no",
-         arguments.max_line_length ? "yes" : "no",
-         arguments.word ? "yes" : "no");
+  exit(EXIT_SUCCESS);
+}
 
-  exit(0);
+void run_process(char *file_name) {
+  FILE *fp;
+  int ch;
+  int chars = 0;
+  size_t bytes = 0;
+  int lines = 0;
+
+  fp = fopen(file_name, "r");
+  if (fp == NULL) {
+    fprintf(stderr, "Error: file %s not found\n", file_name);
+    exit(EXIT_FAILURE);
+  }
+  while ((ch = getwc(fp)) != EOF) {
+    chars++;
+    bytes += sizeof(ch);
+    if (ch == '\n') {
+      lines++;
+    }
+  }
+  printf("%d %ld %d %s", chars, (bytes / 4), lines, file_name);
 }
