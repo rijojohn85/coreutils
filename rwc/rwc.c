@@ -18,7 +18,7 @@ static struct argp_option options[] = {
     {0}};
 
 struct arguments {
-  int bytes, chars, lines, max_line_length, word, no_files;
+  int bytes, chars, lines, max_line_length, word;
   char **files;
 };
 static error_t parse_opt(int key, char *arg, struct argp_state *state) {
@@ -40,13 +40,10 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
     arguments->word = 1;
     break;
   case ARGP_KEY_ARG:
-    // TODO:
-    printf("argnum: %d\n", state->next);
-    arguments->files = &state->argv[state->arg_num];
+    arguments->files = &state->argv[state->next - 1];
     state->next = state->argc;
     break;
   case ARGP_KEY_END:
-    arguments->no_files = state->arg_num;
     if (state->arg_num < 1) {
       argp_usage(state);
     }
