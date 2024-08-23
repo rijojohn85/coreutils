@@ -1,0 +1,4 @@
+Mrwc	rwc.c	/^int main(int argc, char **argv) {$/
+arguments	rwc.c	/^struct arguments {$/
+parse_opt	rwc.c	/^static error_t parse_opt(int key, char *arg, struc/
+run_process	rwc.c	/^void run_process(char *file_name) {$/
