@@ -1,6 +1,8 @@
 #include <argp.h>
+#include <locale.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <wchar.h>
 
 static error_t parse_opt(int key, char *arg, struct argp_state *state);
@@ -60,6 +62,7 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
 static struct argp argp = {options, parse_opt, args_doc, doc};
 
 int main(int argc, char **argv) {
+  setlocale(LC_ALL, "");
   struct arguments arguments;
 
   /* Default values. */
@@ -85,7 +88,9 @@ int main(int argc, char **argv) {
 
 void run_process(char *file_name) {
   FILE *fp;
-  int ch;
+  char *line = NULL;
+  size_t len = 0;
+
   int chars = 0;
   size_t bytes = 0;
   int lines = 0;
@@ -95,12 +100,22 @@ void run_process(char *file_name) {
     fprintf(stderr, "Error: file %s not found\n", file_name);
     exit(EXIT_FAILURE);
   }
-  while ((ch = getwc(fp)) != EOF) {
-    chars++;
-    bytes += sizeof(ch);
-    if (ch == '\n') {
-      lines++;
-    }
+  // while ((ch = fgetwc(fp)) != EOF) {
+  //   chars++;
+  //   bytes += sizeof(ch);
+  //   if (ch == '\n') {
+  //     lines++;
+  //   }
+  // }
+  // printf("%d %ld %d %s", chars, (bytes / 4), lines, file_name);
+  ssize_t bytes_read = 0;
+  while ((bytes_read = getline(&line, &len, fp)) != -1) {
+    wchar_t *wc_string = malloc(sizeof(line));
+    size_t wc_len = mbstowcs(wc_string, line, strlen(line));
+
+    printf("%ls: %zu\n", wc_string, wc_len);
+    // printf("%s: %zu\n", line, strlen(line));
   }
-  printf("%d %ld %d %s", chars, (bytes / 4), lines, file_name);
+  free(line);
+  fclose(fp);
 }

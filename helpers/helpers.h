@@ -2,6 +2,7 @@
 #define HELPERS
 #include <stdbool.h>
 #include <stdio.h>
+#include <wchar.h>
 typedef struct {
   char *input;
   char *alt_inpt;
@@ -40,4 +41,6 @@ void free_arg(Arguments *arg);
  *it in there, probably best to switch this to a do-while.
  */
 char *readline(FILE *fp);
+
+wchar_t *wreadline(FILE *fp);
 #endif

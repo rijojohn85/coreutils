@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <wchar.h>
 void print_help(Options *options, char *examples, char *useage, int length) {
   printf("%s\n", useage);
   for (int i = 0; i < length; i++) {
@@ -128,6 +129,54 @@ char *readline(FILE *fp) {
   // shrink to fit
   if (offset < bufsize - 1) {
     char *new_buf = realloc(buf, offset + 1); //+1 for the null terminator
+    if (new_buf == NULL) {
+      free(buf); // bail on error
+      perror("Error in realloc\n");
+      exit(EXIT_FAILURE);
+    }
+    buf = new_buf; // successful realloc
+  }
+  // Add the nul terminator
+  buf[offset] = '\0';
+  return buf;
+}
+wchar_t *wreadline(FILE *fp) {
+  size_t offset = 0;  // Index next char goes in the buffer
+  size_t bufsize = 4; // initial size of the buffer. preferably multiple of 2
+  wchar_t *buf;       // the buffer
+  wint_t c;           // the character we are going to read.
+
+  buf = malloc(bufsize); // allocate inital buffer
+
+  while (c = fgetwc(fp), c != '\n' && c != EOF) {
+    // check if we're out of room in the buffer account for the extra byte for
+    // the NULL terminator
+
+    if (offset == bufsize - 1) { //-1 for the null terminator.
+      bufsize *= 2;
+      wchar_t *new_buf = realloc(buf, bufsize);
+      if (new_buf == NULL) {
+        free(buf); // bail on error
+        perror("Error in realloc\n");
+        exit(EXIT_FAILURE);
+      }
+      buf = new_buf; // successful realloc
+    }
+    buf[offset++] = c; // add the byte onto the buffer
+  }
+  // we hit newline or EOF
+  //
+  // if at EOF and we read no bytes, free the buffer and return NULL to indicate
+  // we've hit EOF
+  if (c == EOF && offset == 0) {
+    free(buf);
+    return NULL;
+  }
+  printf("%ls\n", buf);
+
+  // shrink to fit
+  if (offset < bufsize - 1) {
+    wchar_t *new_buf = realloc(buf, offset + 1); //+1 for the null terminator
     if (new_buf == NULL) {
       free(buf); // bail on error
       perror("Error in realloc\n");
