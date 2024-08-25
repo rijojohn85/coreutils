@@ -83,29 +83,46 @@ int main(int argc, char **argv) {
 }
 
 void run_process(char *file_name) {
-  // wchar_t ch;
-  wchar_t line[4096];
-  // int chars = 0;
+  // int ch;
+  // // wchar_t line[4096];
+  size_t chars = 0;
+  size_t bytes = 0;
+  int lines = 0;
+  // int words = 0;
+  char *line = NULL;
+  size_t len;
+  ssize_t bytes_read;
 
   FILE *fp = fopen(file_name, "r");
   if (fp == NULL) {
     fprintf(stderr, "Error: file %s not found\n", file_name);
     exit(EXIT_FAILURE);
   }
-  while ((*line = fgetws(line, sizeof(line), fp) != NULL)) {
-    wprintf(L"%ls", line);
+  // int prev_char = '\0';
+  while ((bytes_read = getline(&line, &len, fp)) != -1) {
+    wchar_t a[4096];
+    mbstowcs(a, line, len);
+
+    bytes += strlen(line);
+    chars += wcslen(a);
+    lines++;
   }
-  // while ((ch = fgetwc(fp)) != EOF) {
+  free(line);
+  printf("%ld %ld %d %s", chars, (bytes), lines, file_name);
+
+  // while ((ch = fgetc(fp)) != EOF) {
   //   chars++;
   //   bytes += sizeof(ch);
   //   if (ch == '\n') {
   //     lines++;
   //   }
+  //   if (isspace(ch)) {
+  //     if (!isspace(prev_char)) {
+  //       words++;
+  //     }
+  //   }
+  //   printf("%c", ch);
+  //   prev_char = ch;
   // }
-  // printf("%d %ld %d %s", chars, (bytes / 4), lines, file_name);
-  // while ((line = wreadline(fp)) != NULL) {
-  //   printf("%ls\n", line);
-  // }
-  // free(line);
   fclose(fp);
 }
