@@ -8,6 +8,7 @@
 static error_t parse_opt(int key, char *arg, struct argp_state *state);
 
 void run_process(char *file_name);
+int count_words(wchar_t *line);
 const char *argp_program_bugaddress = "rijojohn85@gmail.com";
 const char *argp_program_version = "rwc - 0.0.1";
 static char doc[] = "wc - print newline, word and byte counts for each file";
@@ -92,13 +93,13 @@ void run_process(char *file_name) {
   char *line = NULL;
   size_t len;
   ssize_t bytes_read;
+  int words = 0;
 
   FILE *fp = fopen(file_name, "r");
   if (fp == NULL) {
     fprintf(stderr, "Error: file %s not found\n", file_name);
     exit(EXIT_FAILURE);
   }
-  // int prev_char = '\0';
   while ((bytes_read = getline(&line, &len, fp)) != -1) {
     wchar_t a[4096];
     mbstowcs(a, line, len);
@@ -106,23 +107,25 @@ void run_process(char *file_name) {
     bytes += strlen(line);
     chars += wcslen(a);
     lines++;
+    int word = count_words(a);
+    words += word;
   }
   free(line);
-  printf("%ld %ld %d %s", chars, (bytes), lines, file_name);
+  printf("%ld %ld %d %d %s\n", chars, (bytes), lines, words, file_name);
 
-  // while ((ch = fgetc(fp)) != EOF) {
-  //   chars++;
-  //   bytes += sizeof(ch);
-  //   if (ch == '\n') {
-  //     lines++;
-  //   }
-  //   if (isspace(ch)) {
-  //     if (!isspace(prev_char)) {
-  //       words++;
-  //     }
-  //   }
-  //   printf("%c", ch);
-  //   prev_char = ch;
-  // }
   fclose(fp);
+}
+
+int count_words(wchar_t *line) {
+  int words = 0;
+  wchar_t *ptr;
+  wchar_t delim[] = L" \t\n";
+  wchar_t *token = wcstok(line, delim, &ptr);
+
+  while (token) {
+    words++;
+    token = wcstok(NULL, delim, &ptr);
+  }
+
+  return words;
 }
