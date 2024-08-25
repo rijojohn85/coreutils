@@ -1,3 +1,4 @@
+#include "../helpers/helpers.h"
 #include <argp.h>
 #include <locale.h>
 #include <stdio.h>
@@ -76,10 +77,6 @@ int main(int argc, char **argv) {
      be reflected in arguments. */
   argp_parse(&argp, argc, argv, 0, 0, &arguments);
 
-  // printf("ARG1 = %s\nARG2 = %s\nOUTPUT_FILE = %s\n"
-  //        "VERBOSE = %s\nSILENT = %s\n",
-  //        arguments.args[0], arguments.args[1], arguments.output_file,
-  //        arguments.verbose ? "yes" : "no", arguments.silent ? "yes" : "no");
   for (int i = 0; arguments.files[i]; i++) {
     run_process(arguments.files[i]);
   }
@@ -88,8 +85,7 @@ int main(int argc, char **argv) {
 
 void run_process(char *file_name) {
   FILE *fp;
-  char *line = NULL;
-  size_t len = 0;
+  wchar_t ch;
 
   int chars = 0;
   size_t bytes = 0;
@@ -100,22 +96,18 @@ void run_process(char *file_name) {
     fprintf(stderr, "Error: file %s not found\n", file_name);
     exit(EXIT_FAILURE);
   }
-  // while ((ch = fgetwc(fp)) != EOF) {
-  //   chars++;
-  //   bytes += sizeof(ch);
-  //   if (ch == '\n') {
-  //     lines++;
-  //   }
-  // }
-  // printf("%d %ld %d %s", chars, (bytes / 4), lines, file_name);
-  ssize_t bytes_read = 0;
-  while ((bytes_read = getline(&line, &len, fp)) != -1) {
-    wchar_t *wc_string = malloc(sizeof(line));
-    size_t wc_len = mbstowcs(wc_string, line, strlen(line));
-
-    printf("%ls: %zu\n", wc_string, wc_len);
-    // printf("%s: %zu\n", line, strlen(line));
+  while ((ch = fgetwc(fp)) != EOF) {
+    chars++;
+    bytes += sizeof(ch);
+    printf("%lc:%ld", ch, sizeof(ch));
+    if (ch == '\n') {
+      lines++;
+    }
   }
-  free(line);
+  printf("%d %ld %d %s", chars, (bytes / 4), lines, file_name);
+  // while ((line = wreadline(fp)) != NULL) {
+  //   printf("%ls\n", line);
+  // }
+  // free(line);
   fclose(fp);
 }

@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <wchar.h>
+#include <wctype.h>
 void print_help(Options *options, char *examples, char *useage, int length) {
   printf("%s\n", useage);
   for (int i = 0; i < length; i++) {
@@ -141,20 +142,24 @@ char *readline(FILE *fp) {
   return buf;
 }
 wchar_t *wreadline(FILE *fp) {
-  size_t offset = 0;  // Index next char goes in the buffer
-  size_t bufsize = 4; // initial size of the buffer. preferably multiple of 2
-  wchar_t *buf;       // the buffer
-  wint_t c;           // the character we are going to read.
+  size_t offset = 0; // Index next char goes in the buffer
+  size_t bufsize =
+      4 *
+      sizeof(wchar_t); // initial size of the buffer. preferably multiple of 2
+  wchar_t *buf;        // the buffer
+  wint_t c;            // the character we are going to read.
 
   buf = malloc(bufsize); // allocate inital buffer
 
-  while (c = fgetwc(fp), c != '\n' && c != EOF) {
+  while (c = fgetwc(fp), c != '\n' && c != (wint_t)EOF) {
     // check if we're out of room in the buffer account for the extra byte for
     // the NULL terminator
 
     if (offset == bufsize - 1) { //-1 for the null terminator.
-      bufsize *= 2;
+      bufsize += bufsize;
+      printf("bufsize: %ld", bufsize);
       wchar_t *new_buf = realloc(buf, bufsize);
+      printf("h1");
       if (new_buf == NULL) {
         free(buf); // bail on error
         perror("Error in realloc\n");
@@ -168,7 +173,7 @@ wchar_t *wreadline(FILE *fp) {
   //
   // if at EOF and we read no bytes, free the buffer and return NULL to indicate
   // we've hit EOF
-  if (c == EOF && offset == 0) {
+  if (c == (wint_t)EOF && offset == 0) {
     free(buf);
     return NULL;
   }
@@ -176,7 +181,8 @@ wchar_t *wreadline(FILE *fp) {
 
   // shrink to fit
   if (offset < bufsize - 1) {
-    wchar_t *new_buf = realloc(buf, offset + 1); //+1 for the null terminator
+    wchar_t *new_buf = realloc(buf, (offset + 1)); //+1 for the null terminator
+    printf("h2");
     if (new_buf == NULL) {
       free(buf); // bail on error
       perror("Error in realloc\n");
