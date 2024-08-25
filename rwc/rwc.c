@@ -1,4 +1,3 @@
-#include "../helpers/helpers.h"
 #include <argp.h>
 #include <locale.h>
 #include <stdio.h>
@@ -84,27 +83,26 @@ int main(int argc, char **argv) {
 }
 
 void run_process(char *file_name) {
-  FILE *fp;
-  wchar_t ch;
+  // wchar_t ch;
+  wchar_t line[4096];
+  // int chars = 0;
 
-  int chars = 0;
-  size_t bytes = 0;
-  int lines = 0;
-
-  fp = fopen(file_name, "r");
+  FILE *fp = fopen(file_name, "r");
   if (fp == NULL) {
     fprintf(stderr, "Error: file %s not found\n", file_name);
     exit(EXIT_FAILURE);
   }
-  while ((ch = fgetwc(fp)) != EOF) {
-    chars++;
-    bytes += sizeof(ch);
-    printf("%lc:%ld", ch, sizeof(ch));
-    if (ch == '\n') {
-      lines++;
-    }
+  while ((*line = fgetws(line, sizeof(line), fp) != NULL)) {
+    wprintf(L"%ls", line);
   }
-  printf("%d %ld %d %s", chars, (bytes / 4), lines, file_name);
+  // while ((ch = fgetwc(fp)) != EOF) {
+  //   chars++;
+  //   bytes += sizeof(ch);
+  //   if (ch == '\n') {
+  //     lines++;
+  //   }
+  // }
+  // printf("%d %ld %d %s", chars, (bytes / 4), lines, file_name);
   // while ((line = wreadline(fp)) != NULL) {
   //   printf("%ls\n", line);
   // }
