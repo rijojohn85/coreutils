@@ -8,6 +8,8 @@
 MunitResult file_open_test(const MunitParameter params[],
                            void *user_data_or_fixture);
 
+MunitResult file_open_failure_test(const MunitParameter params[],
+                                   void *user_data_or_fixture);
 MunitTest tests[] = {
     {
         "/file_open_test",            // name of test
@@ -19,6 +21,14 @@ MunitTest tests[] = {
     },
     /* new tests come below here */
 
+    {
+        "/file_open_failure_test",    // name of test
+        file_open_failure_test,       // test function
+        NULL,                         // setup
+        NULL,                         // teardown
+        MUNIT_TEST_OPTION_NONE, NULL, /* parameters */
+
+    },
     {NULL, NULL, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
 };
 
@@ -37,8 +47,16 @@ MunitResult file_open_test(const MunitParameter params[],
                            void *user_data_or_fixture) {
   (void)params;
   (void)user_data_or_fixture;
-  FILE *fp = NULL;
-  open_file("file.txt", fp);
+  FILE *fp = open_file("file.txt");
   munit_assert_not_null(fp);
+  fclose(fp);
+  return MUNIT_OK;
+}
+MunitResult file_open_failure_test(const MunitParameter params[],
+                                   void *user_data_or_fixture) {
+  (void)params;
+  (void)user_data_or_fixture;
+  FILE *fp = open_file("test.txt");
+  munit_assert_null(fp);
   return MUNIT_OK;
 }
