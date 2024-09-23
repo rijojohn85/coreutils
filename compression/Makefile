@@ -4,8 +4,8 @@ compress: compress.c
 # compile_test: test.o compress.o munit.o
 # 	gcc -g test.o compress.o -o bin/compress_test
 
-compile_test: ./munit/munit.h ./munit/munit.c compress.c compress.h test.c
-	gcc -o bin/compress_test ./munit/munit.c compress.c test.c
+compile_test: ./munit/munit.h ./munit/munit.c ./hashmap.c/hashmap.h ./hashmap.c/hashmap.c compress.c compress.h test.c
+	gcc -o bin/compress_test ./munit/munit.c ./hashmap.c/hashmap.c compress.c test.c
 
 # test.o: test.c compress.h ./munit/munit.h
 # 	gcc -g -c test.c

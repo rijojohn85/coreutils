@@ -1,4 +1,5 @@
 #include "compress.h"
+#include "hashmap.c/hashmap.h"
 #include "munit/munit.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,6 +11,12 @@ MunitResult file_open_test(const MunitParameter params[],
 
 MunitResult file_open_failure_test(const MunitParameter params[],
                                    void *user_data_or_fixture);
+MunitResult test_insert_into_map(const MunitParameter params[],
+                                 void *user_data_or_fixture);
+MunitResult test_get_wrong_data(const MunitParameter params[],
+                                void *user_data_or_fixture);
+MunitResult test_count_of_char(const MunitParameter params[],
+                               void *user_data_or_fixture);
 MunitTest tests[] = {
     {
         "/file_open_test",            // name of test
@@ -24,6 +31,30 @@ MunitTest tests[] = {
     {
         "/file_open_failure_test",    // name of test
         file_open_failure_test,       // test function
+        NULL,                         // setup
+        NULL,                         // teardown
+        MUNIT_TEST_OPTION_NONE, NULL, /* parameters */
+
+    },
+    {
+        "/test_insert_into_map",      // name of test
+        test_insert_into_map,         // test function
+        NULL,                         // setup
+        NULL,                         // teardown
+        MUNIT_TEST_OPTION_NONE, NULL, /* parameters */
+
+    },
+    {
+        "/test_get_wrong_data",       // name of test
+        test_get_wrong_data,          // test function
+        NULL,                         // setup
+        NULL,                         // teardown
+        MUNIT_TEST_OPTION_NONE, NULL, /* parameters */
+
+    },
+    {
+        "/test_count_of_char",        // name of test
+        test_count_of_char,           // test function
         NULL,                         // setup
         NULL,                         // teardown
         MUNIT_TEST_OPTION_NONE, NULL, /* parameters */
@@ -58,5 +89,60 @@ MunitResult file_open_failure_test(const MunitParameter params[],
   (void)user_data_or_fixture;
   FILE *fp = open_file("test.txt");
   munit_assert_null(fp);
+  return MUNIT_OK;
+}
+
+MunitResult test_insert_into_map(const MunitParameter params[],
+                                 void *user_data_or_fixture) {
+  (void)params;
+  (void)user_data_or_fixture;
+  struct hashmap *map = hashmap_new(sizeof(struct letter_count), 0, 0, 0,
+                                    letter_hash, letter_compare, NULL, NULL);
+  insert_into_map('x', map);
+  struct letter_count *letter;
+  letter =
+      (struct letter_count *)hashmap_get(map, &(struct letter_count){.c = 'x'});
+  munit_assert_not_null(letter);
+  munit_assert_char(letter->c, ==, 'x');
+  munit_assert_int(letter->count, ==, 1);
+  hashmap_free(map);
+  return MUNIT_OK;
+}
+MunitResult test_get_wrong_data(const MunitParameter params[],
+                                void *user_data_or_fixture) {
+  (void)params;
+  (void)user_data_or_fixture;
+  struct hashmap *map = hashmap_new(sizeof(struct letter_count), 0, 0, 0,
+                                    letter_hash, letter_compare, NULL, NULL);
+  insert_into_map('x', map);
+  struct letter_count *letter;
+  letter =
+      (struct letter_count *)hashmap_get(map, &(struct letter_count){.c = 'r'});
+  munit_assert_null(letter);
+  hashmap_free(map);
+  return MUNIT_OK;
+}
+MunitResult test_count_of_char(const MunitParameter params[],
+                               void *user_data_or_fixture) {
+  (void)params;
+  (void)user_data_or_fixture;
+  struct hashmap *map = hashmap_new(sizeof(struct letter_count), 0, 0, 0,
+                                    letter_hash, letter_compare, NULL, NULL);
+  insert_into_map('x', map);
+  insert_into_map('r', map);
+  insert_into_map('x', map);
+  insert_into_map('x', map);
+  struct letter_count *letter;
+  letter =
+      (struct letter_count *)hashmap_get(map, &(struct letter_count){.c = 'x'});
+  munit_assert_not_null(letter);
+  munit_assert_char(letter->c, ==, 'x');
+  munit_assert_int(letter->count, ==, 3);
+  letter =
+      (struct letter_count *)hashmap_get(map, &(struct letter_count){.c = 'r'});
+  munit_assert_not_null(letter);
+  munit_assert_char(letter->c, ==, 'r');
+  munit_assert_int(letter->count, ==, 1);
+  hashmap_free(map);
   return MUNIT_OK;
 }
