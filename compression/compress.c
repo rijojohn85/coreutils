@@ -33,3 +33,14 @@ int letter_compare(const void *a, const void *b, void *udata) {
     return 1;
   }
 }
+
+struct hashmap *get_char_count(FILE *fp) {
+  (void)fp;
+  struct hashmap *map = hashmap_new(sizeof(struct letter_count), 0, 0, 0,
+                                    letter_hash, letter_compare, NULL, NULL);
+  int c;
+  while ((c = fgetc(fp)) != EOF) {
+    insert_into_map(c, map);
+  }
+  return map;
+}
