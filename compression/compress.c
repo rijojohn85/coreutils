@@ -2,10 +2,10 @@
 #include "hashmap.c/hashmap.h"
 #include <stdint.h>
 #include <stdio.h>
+#include <wchar.h>
 
 FILE *open_file(char *file_name) { return fopen(file_name, "r"); }
-// TODO: need to change from char to wc.
-void insert_into_map(char c, struct hashmap *map) {
+void insert_into_map(wchar_t c, struct hashmap *map) {
   struct letter_count *letter;
   letter =
       (struct letter_count *)hashmap_get(map, &(struct letter_count){.c = c});
@@ -19,7 +19,7 @@ void insert_into_map(char c, struct hashmap *map) {
 
 uint64_t letter_hash(const void *item, uint64_t seed0, uint64_t seed1) {
   const struct letter_count *letter = item;
-  return hashmap_sip(&(letter->c), 1, seed0, seed1);
+  return hashmap_sip(&(letter->c), sizeof(letter->c), seed0, seed1);
 }
 
 int letter_compare(const void *a, const void *b, void *udata) {
@@ -38,8 +38,8 @@ struct hashmap *get_char_count(FILE *fp) {
   (void)fp;
   struct hashmap *map = hashmap_new(sizeof(struct letter_count), 0, 0, 0,
                                     letter_hash, letter_compare, NULL, NULL);
-  int c;
-  while ((c = fgetc(fp)) != EOF) {
+  wint_t c;
+  while ((c = fgetwc(fp)) != WEOF) {
     insert_into_map(c, map);
   }
   return map;

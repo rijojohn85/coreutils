@@ -1,6 +1,7 @@
 #include "compress.h"
 #include "hashmap.c/hashmap.h"
 #include "munit/munit.h"
+#include <locale.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -19,6 +20,8 @@ MunitResult test_count_of_char(const MunitParameter params[],
                                void *user_data_or_fixture);
 MunitResult test_with_file(const MunitParameter params[],
                            void *user_data_or_fixture);
+MunitResult test_with_lemis(const MunitParameter params[],
+                            void *user_data_or_fixture);
 MunitTest tests[] = {
     {
         "/file_open_test",            // name of test
@@ -70,6 +73,14 @@ MunitTest tests[] = {
         MUNIT_TEST_OPTION_NONE, NULL, /* parameters */
 
     },
+    {
+        "/test_with_lemis",           // name of test
+        test_with_lemis,              // test function
+        NULL,                         // setup
+        NULL,                         // teardown
+        MUNIT_TEST_OPTION_NONE, NULL, /* parameters */
+
+    },
     {NULL, NULL, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
 };
 
@@ -82,6 +93,7 @@ static const MunitSuite suite = {
 };
 
 int main(int argc, char *argv[]) {
+  setlocale(LC_ALL, "en_US.UTF-8");
   return munit_suite_main(&suite, NULL, argc, argv);
 }
 MunitResult file_open_test(const MunitParameter params[],
@@ -190,8 +202,40 @@ MunitResult test_with_file(const MunitParameter params[],
   letter =
       (struct letter_count *)hashmap_get(map, &(struct letter_count){.c = 'e'});
   munit_assert_not_null(letter);
-  munit_assert_char(letter->c, ==, 'e');
+  munit_assert_uchar(letter->c, ==, L'e');
   munit_assert_int(letter->count, ==, 5);
+  letter =
+      (struct letter_count *)hashmap_get(map, &(struct letter_count){.c = 'r'});
+  munit_assert_null(letter);
+  letter = (struct letter_count *)hashmap_get(
+      map, &(struct letter_count){.c = L'カ'});
+  munit_assert_not_null(letter);
+  munit_assert_uchar(letter->c, ==, L'カ');
+  munit_assert_int(letter->count, ==, 1);
+  hashmap_free(map);
+  fclose(fp);
+  return MUNIT_OK;
+}
+MunitResult test_with_lemis(const MunitParameter params[],
+                            void *user_data_or_fixture) {
+  (void)params;
+  (void)user_data_or_fixture;
+  char *file_name = "lemiserables.txt";
+  FILE *fp = open_file(file_name);
+  struct hashmap *map = get_char_count(fp);
+
+  struct letter_count *letter;
+  letter =
+      (struct letter_count *)hashmap_get(map, &(struct letter_count){.c = 'X'});
+  munit_assert_not_null(letter);
+  munit_assert_char(letter->c, ==, 'X');
+  munit_assert_int(letter->count, ==, 333);
+  letter =
+      (struct letter_count *)hashmap_get(map, &(struct letter_count){.c = 't'});
+  munit_assert_not_null(letter);
+  munit_assert_char(letter->c, ==, 't');
+  munit_assert_int(letter->count, ==, 223000);
+  hashmap_free(map);
   fclose(fp);
   return MUNIT_OK;
 }
