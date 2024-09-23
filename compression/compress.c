@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 FILE *open_file(char *file_name) { return fopen(file_name, "r"); }
-
+// TODO: need to change from char to wc.
 void insert_into_map(char c, struct hashmap *map) {
   struct letter_count *letter;
   letter =
