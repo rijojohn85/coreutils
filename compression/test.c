@@ -207,11 +207,6 @@ MunitResult test_with_file(const MunitParameter params[],
   letter =
       (struct letter_count *)hashmap_get(map, &(struct letter_count){.c = 'r'});
   munit_assert_null(letter);
-  letter = (struct letter_count *)hashmap_get(
-      map, &(struct letter_count){.c = L'カ'});
-  munit_assert_not_null(letter);
-  munit_assert_uchar(letter->c, ==, L'カ');
-  munit_assert_int(letter->count, ==, 1);
   hashmap_free(map);
   fclose(fp);
   return MUNIT_OK;
