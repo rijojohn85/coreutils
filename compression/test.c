@@ -1,5 +1,6 @@
 #include "compress.h"
 #include "hashmap.c/hashmap.h"
+#include "huffman/huffman.h"
 #include "munit/munit.h"
 #include <locale.h>
 #include <stdio.h>
@@ -22,6 +23,8 @@ MunitResult test_with_file(const MunitParameter params[],
                            void *user_data_or_fixture);
 MunitResult test_with_lemis(const MunitParameter params[],
                             void *user_data_or_fixture);
+MunitResult test_huffman_with_file(const MunitParameter params[],
+                                   void *user_data_or_fixture);
 MunitTest tests[] = {
     {
         "/file_open_test",            // name of test
@@ -81,6 +84,14 @@ MunitTest tests[] = {
         MUNIT_TEST_OPTION_NONE, NULL, /* parameters */
 
     },
+    {
+        "/test_huffman_with_file",    // name of test
+        test_huffman_with_file,       // test function
+        NULL,                         // setup
+        NULL,                         // teardown
+        MUNIT_TEST_OPTION_NONE, NULL, /* parameters */
+
+    },
     {NULL, NULL, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
 };
 
@@ -93,7 +104,7 @@ static const MunitSuite suite = {
 };
 
 int main(int argc, char *argv[]) {
-  setlocale(LC_ALL, "en_US.UTF-8");
+  setlocale(LC_ALL, "");
   return munit_suite_main(&suite, NULL, argc, argv);
 }
 MunitResult file_open_test(const MunitParameter params[],
@@ -230,6 +241,18 @@ MunitResult test_with_lemis(const MunitParameter params[],
   munit_assert_not_null(letter);
   munit_assert_char(letter->c, ==, 't');
   munit_assert_int(letter->count, ==, 223000);
+  hashmap_free(map);
+  fclose(fp);
+  return MUNIT_OK;
+}
+MunitResult test_huffman_with_file(const MunitParameter params[],
+                                   void *user_data_or_fixture) {
+  (void)params;
+  (void)user_data_or_fixture;
+  char *file_name = "file.txt";
+  FILE *fp = open_file(file_name);
+  struct hashmap *map = get_char_count(fp);
+  HuffmanCodes(map);
   hashmap_free(map);
   fclose(fp);
   return MUNIT_OK;
