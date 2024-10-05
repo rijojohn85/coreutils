@@ -2,6 +2,7 @@
 #include "../compress.h"
 #include "../hashmap.c/hashmap.h"
 
+#include <locale.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -178,10 +179,11 @@ void HuffmanCodes(struct hashmap *map) {
 }
 
 int main() {
-  char *file_name = "file.txt";
+  setlocale(LC_ALL, "");
+  char *file_name = "../lemiserables.txt";
   FILE *fp = open_file(file_name);
   struct hashmap *map = get_char_count(fp);
-  print_map(map);
+  // print_map(map);
   HuffmanCodes(map);
   hashmap_free(map);
   fclose(fp);
