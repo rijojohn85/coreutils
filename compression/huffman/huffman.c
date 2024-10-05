@@ -1,10 +1,12 @@
 #include "huffman.h"
+#include "../compress.h"
+#include "../hashmap.c/hashmap.h"
 
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#define MAX_TREE_HT 150
+#define MAX_TREE_HT 1000
 
 struct MinHeapNode *newNode(struct letter_count letter) {
   struct MinHeapNode *temp =
@@ -75,8 +77,8 @@ void insertMinHeap(struct MinHeap *minHeap, struct MinHeapNode *minHeapNode) {
 }
 
 void buildMinHeap(struct MinHeap *minHeap) {
-  int n = minHeap->size - 1;
   int i;
+  int n = minHeap->size - 1;
   for (i = (n - 1) / 2; i >= 0; --i)
     minHeapify(minHeap, i);
 }
@@ -92,12 +94,14 @@ int isLeaf(struct MinHeapNode *root) { return !(root->left) && !(root->right); }
 
 struct MinHeap *createAndBuildMinHeap(struct hashmap *map) {
   size_t size = hashmap_count(map);
-  struct MinHeap *minHeap = createMinHeap(size);
+  struct MinHeap *minHeap = createMinHeap((unsigned)size);
   size_t iter = 0;
   void *item;
+  int i = 0;
   while (hashmap_iter(map, &iter, &item)) {
     const struct letter_count *letter = item;
-    minHeap->array[iter] = newNode(*letter);
+    minHeap->array[i] = newNode(*letter);
+    i = i + 1;
   }
   minHeap->size = size;
   buildMinHeap(minHeap);
@@ -171,4 +175,14 @@ void HuffmanCodes(struct hashmap *map) {
   // print huffman codes.
   int arr[MAX_TREE_HT], top = 0;
   printCodes(root, arr, top);
+}
+
+int main() {
+  char *file_name = "file.txt";
+  FILE *fp = open_file(file_name);
+  struct hashmap *map = get_char_count(fp);
+  print_map(map);
+  HuffmanCodes(map);
+  hashmap_free(map);
+  fclose(fp);
 }
